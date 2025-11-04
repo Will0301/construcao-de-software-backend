@@ -31,5 +31,10 @@ public class UserController {
         userService.delete(email);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/healthz")
+    public ResponseEntity<String> health() {
+        return ResponseEntity.ok("Tudo jóia chefia");
+    }
 }
 
