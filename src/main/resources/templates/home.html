@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AWS Cognito Login</title>
+    <style>
+        /* ====== RESET ====== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f7;
+            color: #1d1d1f;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background-color: #fff;
+            border-radius: 24px;
+            padding: 48px 56px;
+            width: 90%;
+            max-width: 460px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+
+        p {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #515154;
+            margin-bottom: 24px;
+        }
+
+        strong {
+            color: #007aff;
+        }
+
+        button {
+            background-color: #007aff;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 26px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.25s ease;
+        }
+
+        button:hover {
+            background-color: #0062cc;
+        }
+
+        .user-info {
+            text-align: left;
+            background-color: #f2f2f2;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            overflow-wrap: break-word;
+            word-break: break-word;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        footer {
+            margin-top: 40px;
+            font-size: 0.8rem;
+            color: #86868b;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>AWS Cognito Login</h1>
+
+    <!-- Usuário autenticado -->
+    <div sec:authorize="isAuthenticated()">
+        <p>Bem-vindo, <strong th:text="${#authentication.name}"></strong> 👋</p>
+
+        <div class="user-info">
+            <p><strong>Seus dados:</strong></p>
+            <pre th:text="${#authentication.principal}"></pre>
+        </div>
+
+        <div style="margin-top: 28px;">
+            <a th:href="@{/logout}"><button>Encerrar sessão</button></a>
+        </div>
+    </div>
+
+    <!-- Usuário anônimo -->
+    <div sec:authorize="isAnonymous()">
+        <p>Conecte-se de forma segura com a sua conta Cognito.</p>
+        <a th:href="@{/oauth2/authorization/cognito}">
+            <button>Entrar com Cognito</button>
+        </a>
+    </div>
+
+    <footer>
+        AWS Cognito + Spring Boot • Clean by design 🍎
+    </footer>
+</div>
+</body>
+</html>

@@ -1,15 +1,13 @@
-FROM gradle:8.10-jdk21
-
-# Troca para root temporariamente para poder instalar pacotes
-USER root
-
-# Instala o cliente do PostgreSQL (pg_isready, psql, etc.)
-RUN apt-get update && \
-    apt-get install -y postgresql-client && \
-    rm -rf /var/lib/apt/lists/*
-
-# Volta para o usuário padrão "gradle"
-USER gradle
-
-# Define o diretório de trabalho (mesmo do docker-compose)
+# Etapa 1: Build com Gradle
+FROM gradle:8.10-jdk21 AS build
 WORKDIR /app
+COPY . .
+RUN gradle bootJar --no-daemon
+
+# Etapa 2: Runtime com JDK leve
+FROM eclipse-temurin:21-jdk
+WORKDIR /app
+COPY --from=build /app/build/libs/*.jar app.jar
+
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "app.jar"]

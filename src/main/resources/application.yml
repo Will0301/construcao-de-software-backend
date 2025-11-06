@@ -15,3 +15,19 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  security:
+    oauth2:
+      client:
+        registration:
+          cognito:
+            client-id: 23kahvodovtr718hon0b5r6cag
+            client-secret: <client secret>
+            scope:
+              - phone
+              - openid
+              - email
+            redirect-uri: http://localhost:8080/users/healthz
+        provider:
+          cognito:
+            issuerUri:  https://cognito-idp.us-east-1.amazonaws.com/us-east-1_cJESLfNJj
+            user-name-attribute: username
