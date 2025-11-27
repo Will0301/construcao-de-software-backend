@@ -1,4 +1,4 @@
-package br.com.construcao.repository.model;
+package br.com.construcao.infrastructure.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

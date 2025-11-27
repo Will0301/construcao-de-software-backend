@@ -1,8 +1,8 @@
 package br.com.construcao.model.mapper;
 
-import br.com.construcao.model.UserRequest;
-import br.com.construcao.model.UserResponse;
-import br.com.construcao.repository.model.UserEntity;
+import br.com.construcao.model.dto.request.UserRequest;
+import br.com.construcao.model.dto.response.UserResponse;
+import br.com.construcao.infrastructure.entity.UserEntity;
 
 public class UserMapper {
 

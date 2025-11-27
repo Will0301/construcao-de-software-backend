@@ -1,4 +1,4 @@
-package br.com.construcao.model;
+package br.com.construcao.model.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserResponse {
+public class UserRequest {
     private String name;
 
     private String email;

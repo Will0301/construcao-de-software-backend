@@ -1,7 +1,7 @@
 package br.com.construcao.controller;
 
-import br.com.construcao.model.UserRequest;
-import br.com.construcao.model.UserResponse;
+import br.com.construcao.model.dto.request.UserRequest;
+import br.com.construcao.model.dto.response.UserResponse;
 import br.com.construcao.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

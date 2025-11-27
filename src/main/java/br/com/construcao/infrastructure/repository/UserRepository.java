@@ -1,6 +1,6 @@
-package br.com.construcao.repository;
+package br.com.construcao.infrastructure.repository;
 
-import br.com.construcao.repository.model.UserEntity;
+import br.com.construcao.infrastructure.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
