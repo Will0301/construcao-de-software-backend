@@ -20,23 +20,20 @@ import org.springframework.web.server.ResponseStatusException;
 public class AppointmentController {
 
     private final AppointmentService service;
-    private final UserRepository userRepository; // Necessário para converter o Email do Token em ID do Banco
+    private final UserRepository userRepository;
 
     @PostMapping
     public ResponseEntity<AppointmentResponse> create(
             @RequestBody @Valid AppointmentRequest request,
-            JwtAuthenticationToken token // O Spring injeta o token validado aqui automaticamente
+            JwtAuthenticationToken token
     ) {
-        // 1. Extrair o email de dentro do Token JWT (Vindo do Cognito/Auth0)
-        // O campo geralmente é "email", mas confirme se o seu provedor não manda como "username" ou "sub"
+
         String userEmail = token.getTokenAttributes().get("email").toString();
 
-        // 2. Buscar o usuário correspondente no seu banco de dados local (PostgreSQL)
         UserEntity currentUser = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED,
                         "Usuário autenticado no Cognito, mas não encontrado no banco de dados local."));
 
-        // 3. Chamar o serviço passando o ID real do usuário do banco
         AppointmentResponse response = service.create(currentUser.getId(), request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);

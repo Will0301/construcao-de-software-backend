@@ -25,29 +25,24 @@ public class AppointmentService {
 
     public AppointmentResponse create(Long clientId, AppointmentRequest request) {
 
-        //Validação: É feriado?
         if (holidayRepo.existsByDate(request.start().toLocalDate())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Não é possível agendar em feriados.");
         }
 
-        //Validação: O médico bloqueou a agenda?
         if (blockRepo.existsConflict(request.providerId(), request.start(), request.end())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "O prestador possui um bloqueio neste horário.");
         }
 
-        //Validação: Já tem outro cliente marcado?
         if (appointmentRepo.existsConflict(request.providerId(), request.start(), request.end())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Horário indisponível.");
         }
 
-        //Buscar os envolvidos no banco
         ProviderEntity provider = providerRepo.findById(request.providerId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Prestador não encontrado"));
 
         UserEntity client = userRepo.findById(clientId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado"));
 
-        //Salvar o Agendamento (Status CREATED
         AppointmentEntity entity = AppointmentEntity.builder()
                 .provider(provider)
                 .client(client)
@@ -58,7 +53,6 @@ public class AppointmentService {
 
         AppointmentEntity saved = appointmentRepo.save(entity);
 
-        //Converter para DTO de resposta
         return new AppointmentResponse(
                 saved.getId(),
                 provider.getUser().getName(),
@@ -72,12 +66,10 @@ public class AppointmentService {
         AppointmentEntity appointment = appointmentRepo.findById(appointmentId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Agendamento não encontrado"));
 
-        //Validação de Ownership (Só quem criou ou o admin pode cancelar)
         if (!appointment.getClient().getId().equals(userId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Você não tem permissão para cancelar este agendamento");
         }
 
-        //Regra de Negócio: Cancelar apenas se permitido (ex: não pode cancelar agendamento passado)
         if (appointment.getStartTime().isBefore(LocalDateTime.now())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Não é possível cancelar agendamentos passados.");
         }
