@@ -6,6 +6,7 @@ import br.com.construcao.model.dto.response.AppointmentResponse;
 import br.com.construcao.service.AppointmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -14,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import java.util.List;
 
 @RestController
+@PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/api/v1/admin/appointments")
 @RequiredArgsConstructor
 public class AdminAppointmentController {
@@ -34,11 +36,8 @@ public class AdminAppointmentController {
         return ResponseEntity.ok(list);
     }
 
-    // opcional: admin real ver todos
     @GetMapping
     public ResponseEntity<List<AppointmentResponse>> listAll() {
-        // se quiser diferenciar ADMIN de PROVIDER, dá pra checar roles aqui
-        // por enquanto, pode deixar sem filtro se só admin acessar a rota
         throw new UnsupportedOperationException("Implementar se quiser 'ver tudo'");
     }
 }

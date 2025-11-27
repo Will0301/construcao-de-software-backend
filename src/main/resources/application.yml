@@ -2,27 +2,33 @@ spring:
   docker:
     compose:
       enabled: false
+
   application:
     name: construcao-de-software-backend
+
   datasource:
-    url: jdbc:postgresql://localhost:5432/mydb
-    username: myuser
-    password: mypassword
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
   flyway:
     enabled: true
     locations: classpath:db/migration
-  jpa:
-    hibernate:
-      ddl-auto: validate
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
+
   security:
-      oauth2:
-        resourceserver:
-          jwt:
-            issuer-uri: https://cognito-idp.<regiao>.amazonaws.com/<user-pool-id>
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_x1HwsIhnE
+
 app:
   reports:
-    bucket: nome-do-teu-bucket-s3
+    bucket: construcao-de-software

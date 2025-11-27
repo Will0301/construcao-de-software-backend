@@ -43,7 +43,7 @@ public class SecurityConfiguration {
     private AbstractAuthenticationToken jwtAuthenticationConverter(Jwt jwt) {
         JwtGrantedAuthoritiesConverter delegate = new JwtGrantedAuthoritiesConverter();
         delegate.setAuthorityPrefix("ROLE_");
-        delegate.setAuthoritiesClaimName("cognito:groups"); // grupos do Cognito
+        delegate.setAuthoritiesClaimName("cognito:groups");
 
         Collection<GrantedAuthority> authorities = delegate.convert(jwt);
         return new JwtAuthenticationToken(jwt, authorities);
