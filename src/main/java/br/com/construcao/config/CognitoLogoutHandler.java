@@ -1,3 +1,5 @@
+//Em apis rest precisa de logout para o backend? pelo que eu sei o logout acontece jogando fora o token no front
+/*
 package br.com.construcao.config;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,3 +28,4 @@ public class CognitoLogoutHandler extends SimpleUrlLogoutSuccessHandler {
                 .toUriString();
     }
 }
+ */

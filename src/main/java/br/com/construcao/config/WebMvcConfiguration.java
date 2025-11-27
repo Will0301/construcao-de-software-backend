@@ -1,3 +1,5 @@
+//Como a api vai retornar em json acho que nao e necessaria essa classe
+/*
 package br.com.construcao.config;
 
 import org.springframework.context.annotation.Configuration;
@@ -11,3 +13,4 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
         registry.addViewController("/").setViewName("home");
     }
 }
+*/

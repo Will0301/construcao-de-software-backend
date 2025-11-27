@@ -1,10 +1,10 @@
 package br.com.construcao.service;
 
-import br.com.construcao.model.UserRequest;
-import br.com.construcao.model.UserResponse;
+import br.com.construcao.model.dto.request.UserRequest;
+import br.com.construcao.model.dto.response.UserResponse;
 import br.com.construcao.model.mapper.UserMapper;
-import br.com.construcao.repository.UserRepository;
-import br.com.construcao.repository.model.UserEntity;
+import br.com.construcao.infrastructure.repository.UserRepository;
+import br.com.construcao.infrastructure.entity.UserEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
