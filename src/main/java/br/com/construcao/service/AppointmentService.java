@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -59,6 +60,39 @@ public class AppointmentService {
                 saved.getStartTime(),
                 saved.getEndTime(),
                 saved.getStatus()
+        );
+    }
+
+    public List<AppointmentResponse> listByClient(Long userId) {
+        UserEntity client = userRepo.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
+
+        return appointmentRepo.findByClient(client)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    public List<AppointmentResponse> listByProvider(Long userId) {
+        UserEntity user = userRepo.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
+
+        ProviderEntity provider = providerRepo.findByUser(user)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Usuário não é um prestador"));
+
+        return appointmentRepo.findByProvider(provider)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    private AppointmentResponse toResponse(AppointmentEntity entity) {
+        return new AppointmentResponse(
+                entity.getId(),
+                entity.getProvider().getUser().getName(),
+                entity.getStartTime(),
+                entity.getEndTime(),
+                entity.getStatus()
         );
     }
 

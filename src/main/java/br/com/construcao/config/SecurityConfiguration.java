@@ -2,57 +2,50 @@ package br.com.construcao.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
-import static org.springframework.security.config.Customizer.withDefaults;
-
-/*@Configuration
-@EnableWebSecurity
-public class SecurityConfiguration {
-
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        CognitoLogoutHandler cognitoLogoutHandler = new CognitoLogoutHandler();
-
-        http
-                .csrf(Customizer.withDefaults())
-                .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/").permitAll()
-                        .anyRequest().authenticated())
-                .oauth2Login(Customizer.withDefaults())
-                .logout(logout -> logout.logoutSuccessHandler(cognitoLogoutHandler));
-
-        return http.build();
-    }
-}
-
- */
+import java.util.Collection;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                // Desabilita CSRF (Essencial para APIs, senão o Postman toma erro 403 em POST/PUT)
-                .csrf(AbstractHttpConfigurer::disable)
+    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-                .authorizeHttpRequests(authz -> authz
-                        // Permite acesso livre ao Swagger e Health Check
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/actuator/**").permitAll()
-                        // Todo o resto exige autenticação
+        http.csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth ->
+                        auth.requestMatchers(
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/actuator/**",
+                                "/users/healthz"
+                        ).permitAll()
+                        .requestMatchers("/api/v1/admin/**").hasAnyRole("ADMIN", "PROFESSIONAL")
+                        .requestMatchers("/api/v1/appointments/**").authenticated()
                         .anyRequest().authenticated()
                 )
-                // CONFIGURAÇÃO CORRETA PARA API (Lê o Token JWT do Header Authorization)
-                .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(withDefaults())
+                .oauth2ResourceServer(oauth -> oauth
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(this::jwtAuthenticationConverter))
                 );
 
         return http.build();
+    }
+
+    private AbstractAuthenticationToken jwtAuthenticationConverter(Jwt jwt) {
+        JwtGrantedAuthoritiesConverter delegate = new JwtGrantedAuthoritiesConverter();
+        delegate.setAuthorityPrefix("ROLE_");
+        delegate.setAuthoritiesClaimName("cognito:groups"); // grupos do Cognito
+
+        Collection<GrantedAuthority> authorities = delegate.convert(jwt);
+        return new JwtAuthenticationToken(jwt, authorities);
     }
 }

@@ -14,6 +14,8 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/appointments")
 @RequiredArgsConstructor
@@ -27,7 +29,6 @@ public class AppointmentController {
             @RequestBody @Valid AppointmentRequest request,
             JwtAuthenticationToken token
     ) {
-
         String userEmail = token.getTokenAttributes().get("email").toString();
 
         UserEntity currentUser = userRepository.findByEmail(userEmail)
@@ -35,7 +36,19 @@ public class AppointmentController {
                         "Usuário autenticado no Cognito, mas não encontrado no banco de dados local."));
 
         AppointmentResponse response = service.create(currentUser.getId(), request);
-
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<List<AppointmentResponse>> listMyAppointments(JwtAuthenticationToken token) {
+
+        String userEmail = token.getTokenAttributes().get("email").toString();
+
+        UserEntity currentUser = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+                        "Usuário autenticado no Cognito, mas não encontrado no banco de dados local."));
+
+        List<AppointmentResponse> appointments = service.listByClient(currentUser.getId());
+        return ResponseEntity.ok(appointments);
     }
 }
