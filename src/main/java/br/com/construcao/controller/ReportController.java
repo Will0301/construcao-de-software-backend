@@ -15,7 +15,7 @@ public class ReportController {
     @Autowired
     private final ReportService reportService;
 
-    @GetMapping("/week")
+    @GetMapping("/week/report")
     public ResponseEntity<String> weeklyReport(JwtAuthenticationToken auth) {
         String key = reportService.generateWeeklyReportAndUpload();
         return ResponseEntity.ok(key);

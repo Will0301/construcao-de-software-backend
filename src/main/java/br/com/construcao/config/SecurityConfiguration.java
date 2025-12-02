@@ -27,7 +27,7 @@ public class SecurityConfiguration {
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/actuator/**",
-                                "/users/healthz"
+                                "/api/v1/users/healthz"
                         ).permitAll()
                         .requestMatchers("/api/v1/admin/**").hasAnyRole("ADMIN", "PROFESSIONAL")
                         .requestMatchers("/api/v1/appointments/**").authenticated()

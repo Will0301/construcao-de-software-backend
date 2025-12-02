@@ -51,16 +51,13 @@ class AvailabilityServiceTest {
                 .build();
         when(scheduleRuleRepo.findByProviderIdAndDayOfWeek(1L, 1)).thenReturn(Optional.of(rule));
 
-        // Mock: Não tem feriado, agendamento ou bloqueio
         when(holidayRepo.existsByDate(data)).thenReturn(false);
         when(appointmentRepo.findByProviderAndDate(any(), any(), any())).thenReturn(List.of());
 
         when(blockRepo.findByProviderAndDate(any(), any(), any())).thenReturn(List.of());
 
-        // AÇÃO
         var result = service.getAvailability(providerId, data);
 
-        // VERIFICAÇÃO
         assertEquals(4, result.availableTimes().size());
         assertEquals("08:00", result.availableTimes().get(0));
         assertEquals("11:00", result.availableTimes().get(3));

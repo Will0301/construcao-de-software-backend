@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
-  title: User API
+  title: Construção de Software API
   version: 1.0.0
-  description: API para gerenciar usuários (criar, listar e deletar por email)
+  description: API para gerenciar usuários, agendamentos (cliente e prestador) e relatórios semanais.
 
 servers:
   - url: http://localhost:8080
@@ -103,7 +103,274 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /users/healthz:
+    get:
+      summary: Healthcheck da API de usuários
+      operationId: healthUsers
+      tags:
+        - Users
+      responses:
+        '200':
+          description: API de usuários está saudável
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Tudo jóia chefia
+
+  /api/v1/appointments:
+    post:
+      summary: Cria um novo agendamento
+      operationId: createAppointment
+      tags:
+        - Appointments
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppointmentRequest'
+      responses:
+        '201':
+          description: Agendamento criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppointmentResponse'
+        '400':
+          description: Dados inválidos (datas no passado, etc.)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Prestador ou cliente não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflito de horário (bloqueio ou outro agendamento)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/appointments/me:
+    get:
+      summary: Lista agendamentos do usuário autenticado (cliente)
+      operationId: listMyAppointments
+      tags:
+        - Appointments
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de agendamentos do usuário autenticado
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AppointmentResponse'
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/appointments/{id}/cancel:
+    post:
+      summary: Cancela um agendamento do usuário autenticado
+      operationId: cancelAppointment
+      tags:
+        - Appointments
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID do agendamento a ser cancelado
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Agendamento cancelado com sucesso
+        '400':
+          description: Não é possível cancelar agendamentos passados
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Usuário não é o dono do agendamento
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Agendamento não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/appointments/availability:
+    get:
+      summary: Consulta horários disponíveis para um prestador em uma data
+      operationId: getAvailability
+      tags:
+        - Appointments
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: providerId
+          in: query
+          required: true
+          description: ID do prestador
+          schema:
+            type: integer
+            format: int64
+        - name: date
+          in: query
+          required: true
+          description: Data desejada (YYYY-MM-DD)
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Disponibilidade retornada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AvailabilityResponse'
+        '400':
+          description: Parâmetros inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Prestador não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/admin/appointments/mine:
+    get:
+      summary: Lista agendamentos do prestador autenticado (admin/provider)
+      operationId: listMyAppointmentsAsProvider
+      tags:
+        - Admin Appointments
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de agendamentos do prestador autenticado
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AppointmentResponse'
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Usuário não tem papel de ADMIN/PRESTADOR
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/admin/appointments:
+    get:
+      summary: Lista todos os agendamentos do sistema
+      operationId: listAllAppointments
+      tags:
+        - Admin Appointments
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de todos os agendamentos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AppointmentResponse'
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Usuário não tem papel de ADMIN
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/admin/reports/week:
+    get:
+      summary: Gera relatório semanal de agendamentos e faz upload no S3
+      operationId: weeklyReport
+      tags:
+        - Reports
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Key do arquivo gerado no S3
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: reports/weekly-report-2025-11-27.csv
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Usuário não tem papel de ADMIN
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
   schemas:
     UserRequest:
       type: object
@@ -122,10 +389,6 @@ components:
     UserResponse:
       type: object
       properties:
-        id:
-          type: integer
-          format: int64
-          example: 1
         name:
           type: string
           example: João Silva
@@ -134,13 +397,72 @@ components:
           format: email
           example: joao.silva@email.com
 
+    AppointmentRequest:
+      type: object
+      properties:
+        providerId:
+          type: integer
+          format: int64
+          example: 10
+        start:
+          type: string
+          format: date-time
+          example: 2025-12-01T14:00:00
+        end:
+          type: string
+          format: date-time
+          example: 2025-12-01T15:00:00
+      required:
+        - providerId
+        - start
+        - end
+
+    AppointmentResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 123
+        providerName:
+          type: string
+          example: "Clínica XPTO"
+        start:
+          type: string
+          format: date-time
+          example: 2025-12-01T14:00:00
+        end:
+          type: string
+          format: date-time
+          example: 2025-12-01T15:00:00
+        status:
+          type: string
+          example: CREATED
+
+    AvailabilityResponse:
+      type: object
+      properties:
+        providerId:
+          type: integer
+          format: int64
+          example: 10
+        date:
+          type: string
+          format: date
+          example: 2025-12-01
+        availableTimes:
+          type: array
+          items:
+            type: string
+            example: "09:00"
+
     ErrorResponse:
       type: object
       properties:
         timestamp:
           type: string
           format: date-time
-          example: 2025-08-19T18:30:00Z
+          example: 2025-11-27T18:30:00Z
         status:
           type: integer
           example: 400

@@ -11,21 +11,22 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Page;
+
 
 import java.util.List;
 
+@RequestMapping("/api/v1/admin/appointments")
 @RestController
 @PreAuthorize("hasRole('ADMIN')")
-@RequestMapping("/api/v1/admin/appointments")
 @RequiredArgsConstructor
 public class AdminAppointmentController {
 
     private final AppointmentService appointmentService;
     private final UserRepository userRepository;
 
-    @GetMapping("/mine")
+    @GetMapping("/list")
     public ResponseEntity<List<AppointmentResponse>> listMyAppointmentsAsProvider(JwtAuthenticationToken token) {
-
         String email = token.getTokenAttributes().get("email").toString();
 
         UserEntity currentUser = userRepository.findByEmail(email)
@@ -36,9 +37,16 @@ public class AdminAppointmentController {
         return ResponseEntity.ok(list);
     }
 
+    // NOVO: listagem paginada + filtro de status
     @GetMapping
-    public ResponseEntity<List<AppointmentResponse>> listAll() {
-        throw new UnsupportedOperationException("Implementar se quiser 'ver tudo'");
+    public ResponseEntity<Page<AppointmentResponse>> listAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String status
+    ) {
+        Page<AppointmentResponse> result = appointmentService.listPaged(status, page, size);
+        return ResponseEntity.ok(result);
     }
 }
+
 

@@ -24,7 +24,7 @@ public class AppointmentController {
     private final AppointmentService service;
     private final UserRepository userRepository;
 
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<AppointmentResponse> create(
             @RequestBody @Valid AppointmentRequest request,
             JwtAuthenticationToken token
@@ -39,7 +39,7 @@ public class AppointmentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("/me")
+    @GetMapping("/list")
     public ResponseEntity<List<AppointmentResponse>> listMyAppointments(JwtAuthenticationToken token) {
 
         String userEmail = token.getTokenAttributes().get("email").toString();

@@ -3,6 +3,7 @@ package br.com.construcao.controller;
 import br.com.construcao.model.dto.request.UserRequest;
 import br.com.construcao.model.dto.response.UserResponse;
 import br.com.construcao.service.UserService;
+import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -21,13 +22,13 @@ public class UserController {
         return ResponseEntity.ok(userService.findAll());
     }
 
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<UserResponse> create(@RequestBody UserRequest request) {
         return ResponseEntity.ok(userService.addUser(request));
     }
 
-    @DeleteMapping("/{email}")
-    public ResponseEntity<Void> delete(@PathVariable String email) {
+    @DeleteMapping("/delete")
+    public ResponseEntity<Void> delete(@PathParam("email") String email) {
         userService.delete(email);
         return ResponseEntity.noContent().build();
     }

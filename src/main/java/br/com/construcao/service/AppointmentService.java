@@ -7,6 +7,10 @@ import br.com.construcao.infrastructure.repository.*;
 import br.com.construcao.model.dto.request.AppointmentRequest;
 import br.com.construcao.model.dto.response.AppointmentResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -63,6 +67,19 @@ public class AppointmentService {
         );
     }
 
+    public Page<AppointmentResponse> listPaged(String status, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("startTime").descending());
+
+        Page<AppointmentEntity> pageResult;
+        if (status != null && !status.isBlank()) {
+            pageResult = appointmentRepo.findByStatus(status.toUpperCase(), pageable);
+        } else {
+            pageResult = appointmentRepo.findAll(pageable);
+        }
+
+        return pageResult.map(this::toResponse);
+    }
+
     public List<AppointmentResponse> listByClient(Long userId) {
         UserEntity client = userRepo.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
@@ -85,6 +102,8 @@ public class AppointmentService {
                 .map(this::toResponse)
                 .toList();
     }
+
+
 
     private AppointmentResponse toResponse(AppointmentEntity entity) {
         return new AppointmentResponse(
