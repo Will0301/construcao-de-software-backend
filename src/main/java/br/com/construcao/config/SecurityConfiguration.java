@@ -21,6 +21,7 @@ import java.util.Collection;
 public class SecurityConfiguration {
 
     @Bean
+    @Profile("!dev")
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http.csrf(AbstractHttpConfigurer::disable)

@@ -34,3 +34,10 @@ spring:
 app:
   reports:
     bucket: construcao-de-software
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+  show-actuator: true
